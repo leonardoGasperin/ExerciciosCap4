@@ -301,10 +301,12 @@ void BunraKo()
 	bool leave = false;
 	bool rules;
 	bool oddPair;
-	bool pOddPair;
+	bool pOddPair = NULL;
 	bool AIOddPair;
 	bool playerTurn;
 	bool highBet;
+	bool checkBet = false;
+	bool playerHavedBet = true;
 	string name;
 
 	srand(time(NULL));
@@ -321,18 +323,44 @@ void BunraKo()
 
 	do
 	{
+		if (bet != 0 || bet != NULL)
+			bet = 0;
 		playerTurn = true;
 		cout << "Ok it's your turn" << endl << "your Credits: " << myCredit << endl;
-		cin >> bet;
+		
+		while (!checkBet) 
+		{
+			cin >> bet;
+			if (bet > myCredit || bet < 0)
+			{
+				if (bet > 0)
+					cout << "HEY Fella you don't have so much! Try again:\nbet:  ";
+				else
+					cout << "You can't\nbet:  ;";
+			}
+			if (bet <= myCredit)
+				checkBet = 1;
 
+			if (bet == 0)
+			{
+				playerHavedBet = 0;
+				checkBet = 1;
+			}
+			else
+				cout << "Something goes wrong O.x" << endl;
+		}
 		pot += bet;
 		myCredit -= bet;
 		bet = 0;
 		playerTurn = 0;
 
-		cout << endl << "your Credits: " << myCredit << endl << "Total on pot: " << pot << endl << "choose 1.odd or 0.pair" << endl;
-		cin >> pOddPair;
-		cout << "Ok know is my turn" << endl;
+		if (playerHavedBet) 
+		{
+			cout << endl << "your Credits: " << myCredit << endl << "Total on pot: " << pot << endl << "choose 1.odd or 0.pair" << endl;
+			cin >> pOddPair;
+		}
+
+		cout << "Ok now is my turn" << endl;
 
 		//AI
 		if (!playerTurn)
@@ -346,7 +374,7 @@ void BunraKo()
 			cout << "PC choose " << AIOddPair;
 		}
 
-		cout << endl << "Do you want see the result or leave?(1.yes/0.leave):" << endl;
+		cout << endl << "Do you want see the result or leave?(0.yes/1.leave):" << endl;
 		cin >> leave;
 
 		if (num == 0)
@@ -363,30 +391,30 @@ void BunraKo()
 		else
 			oddPair = 1;
 
-		if (oddPair == pOddPair && oddPair != AIOddPair)
+		if (pOddPair != NULL || (oddPair == pOddPair && oddPair != AIOddPair))
 		{
 			myCredit += pot;
 			if (pOddPair)
-				cout << "BON-KO! " << aux2 << " " << name << " WON!" << endl;
+				cout << "BON-KO! " << aux2 << " " << name << " WON! " << pot << " credits" << endl;
 			else
-				cout << "BON-HA! " << aux2 << " " << name << " WON!" << endl;
+				cout << "BON-HA! " << aux2 << " " << name << " WON!" << pot << " credits" << endl;
 		}
-		else if (oddPair == AIOddPair && oddPair != pOddPair)
+		else if (pOddPair == NULL || (oddPair == AIOddPair && oddPair != pOddPair))
 		{
 			pcCredit += pot;
-			if (AIOddPair)
-				cout << "BON-KO! " << aux2 << " " << " PC WON!" << endl;
+			if (AIOddPair || !playerHavedBet)
+				cout << "BON-KO! " << aux2 << " " << " PC WON!" << endl << " " << pot << endl;
 			else
-				cout << "BON-HA! " << aux2 << " " << " PC WON!" << endl;
+				cout << "BON-HA! " << aux2 << " " << " PC WON!" << endl << " " << pot << endl;
 		}
-		else if ((oddPair == pOddPair && oddPair == AIOddPair) || (oddPair != pOddPair && oddPair != AIOddPair))
+		else if (((oddPair == pOddPair && oddPair == AIOddPair) && playerHavedBet) || ((oddPair != pOddPair && oddPair != AIOddPair) && playerHavedBet))
 		{
 			myCredit += (pot / 2);
 			pcCredit += (pot / 2);
 			if (AIOddPair && pOddPair)
-				cout << "BON-KO! " << aux2 << " " << " we WON!" << endl;
+				cout << "BON-KO! " << aux2 << " " << " we WON! " << pot / 2 << endl;
 			else
-				cout << "BON-HA! " << aux2 << " " << " we WON!" << endl;
+				cout << "BON-HA! " << aux2 << " " << " we WON!" << pot / 2 << endl;
 		}
 		else
 			cout << "Something going wrong!" << endl;
@@ -397,18 +425,18 @@ void BunraKo()
 		aux = 0;
 		pOddPair = NULL;
 		AIOddPair = NULL;
+		checkBet = false;
+		playerHavedBet = true;
 
-		if (myCredit == 0 || pcCredit == 0)
+		if (myCredit <= 0 || pcCredit <= 0)
 		{
 			if (myCredit == 0)
 			{
 				cout << "You lose! more luck next time!" << endl;
-				myCredit = 1000;
 			}
 			else if (pcCredit == 0)
 			{
 				cout << "You Won! less luck next time!" << endl;
-				pcCredit = 1000;
 			}
 			else
 				cout << "Come thing goes wrong!" << endl;
